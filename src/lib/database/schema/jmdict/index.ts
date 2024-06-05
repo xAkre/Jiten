@@ -11,3 +11,19 @@ export {
     jmdictKanjiElementPriorityTable,
     jmdictKanjiElementPriorityRelations,
 } from './jmdictKanjiElementPriority';
+export {
+    jmdictReadingElementTable,
+    jmdictReadingElementRelations,
+} from './jmdictReadingElement';
+export {
+    jmdictReadingElementAdditionalInformationTable,
+    jmdictReadingElementAdditionalInformationRelations,
+} from './jmdictReadingElementAdditionalInformation';
+export {
+    jmdictReadingElementPriorityTable,
+    jmdictReadingElementPriorityRelations,
+} from './jmdictReadingElementPriority';
+export {
+    jmdictReadingElementRestrictedReadingTable,
+    jmdictReadingElementRestrictedReadingRelations,
+} from './jmdictReadingElementRestrictedReading';
