@@ -1,0 +1,17 @@
+{
+    "name": "jiten",
+    "version": "1.0.0",
+    "description": "Jiten is a Japanese - English dictionary built on the [JMdict](http://www.edrdg.org/jmdict/j_jmdict.html) project",
+    "main": "index.js",
+    "scripts": {
+        "format": "prettier --write .",
+        "pre:push": "npm run format"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "prettier": "^3.3.0",
+        "typescript": "^5.4.5"
+    }
+}
