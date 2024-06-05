@@ -3,15 +3,25 @@
     "version": "1.0.0",
     "description": "Jiten is a Japanese - English dictionary built on the [JMdict](http://www.edrdg.org/jmdict/j_jmdict.html) project",
     "main": "index.js",
+    "type": "module",
     "scripts": {
         "format": "prettier --write .",
-        "pre:push": "npm run format"
+        "pre:push": "npm run format",
+        "dev": "vite dev",
+        "build": "vite build",
+        "preview": "vite preview"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "@sveltejs/adapter-auto": "^3.2.1",
+        "@sveltejs/kit": "^2.5.10",
         "prettier": "^3.3.0",
-        "typescript": "^5.4.5"
+        "prettier-plugin-svelte": "^3.2.3",
+        "svelte": "^4.2.17",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.12",
+        "vitest": "^1.6.0"
     }
 }
