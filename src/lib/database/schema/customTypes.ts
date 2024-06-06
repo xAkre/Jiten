@@ -23,4 +23,56 @@ const jmdictSourceLanguageTypeEnum = pgEnum('jmdict_source_language_type', [
     'partial',
 ]);
 
-export { uuid, jmdictGlossTypeEnum, jmdictSourceLanguageTypeEnum };
+const kanjiDicCodepointStandardEnum = pgEnum('kanjidic_codepoint_standard', [
+    'jis208',
+    'jis212',
+    'jis213',
+    'ucs',
+]);
+
+const kanjiDicRadicalTypeEnum = pgEnum('kanjidic_radical_type', [
+    'classical',
+    'nelson_c',
+]);
+
+const kanjiDicVariantTypeEnum = pgEnum('kanjidic_variant_type', [
+    'jis208',
+    'jis212',
+    'jis213',
+    'deroo',
+    'njecd',
+    's_h',
+    'nelson_c',
+    'oneill',
+    'ucs',
+]);
+
+const kanjiDicQueryCodeTypeEnum = pgEnum('kanjidic_query_code_type', [
+    'skip',
+    'sh_desc',
+    'four_corner',
+    'deroo',
+    'misclass',
+]);
+
+const kanjiDicQueryCodeSkipMisclassEnum = pgEnum(
+    'kanjidic_query_code_skip_misclass',
+    ['posn', 'stroke_count', 'stroke_and_posn', 'stroke_diff'],
+);
+
+const kanjiDicReadingOnTypeEnum = pgEnum('kanjidic_reading_on_type', [
+    'kun',
+    'on',
+]);
+
+export {
+    uuid,
+    jmdictGlossTypeEnum,
+    jmdictSourceLanguageTypeEnum,
+    kanjiDicCodepointStandardEnum,
+    kanjiDicRadicalTypeEnum,
+    kanjiDicVariantTypeEnum,
+    kanjiDicQueryCodeTypeEnum,
+    kanjiDicQueryCodeSkipMisclassEnum,
+    kanjiDicReadingOnTypeEnum,
+};

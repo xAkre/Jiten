@@ -5,6 +5,7 @@ const config = defineConfig({
     schema: [
         'src/lib/database/schema/customTypes.ts',
         'src/lib/database/schema/jmdict',
+        'src/lib/database/schema/kanjidic',
     ],
     out: 'src/lib/database/migrations',
 });
