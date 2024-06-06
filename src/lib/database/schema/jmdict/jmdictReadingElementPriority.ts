@@ -27,7 +27,7 @@ const jmdictReadingElementPriorityRelations = relations(
         readingElement: one(jmdictReadingElementTable, {
             fields: [jmdictReadingElementPriorityTable.jmdictReadingElementId],
             references: [jmdictReadingElementTable.id],
-            relationName: 'readingElement',
+            relationName: 'priority',
         }),
     }),
 );

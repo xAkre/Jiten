@@ -32,7 +32,7 @@ const jmdictKanjiElementAdditionalInformationRelations = relations(
                 jmdictKanjiElementAdditionalInformationTable.jmdictKanjiElementId,
             ],
             references: [jmdictKanjiElementTable.id],
-            relationName: 'kanjiElement',
+            relationName: 'additionalInformation',
         }),
     }),
 );

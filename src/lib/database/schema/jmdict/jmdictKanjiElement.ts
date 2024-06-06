@@ -21,7 +21,7 @@ const jmdictKanjiElementRelations = relations(
         entry: one(jmdictEntryTable, {
             fields: [jmdictKanjiElementTable.jmdictEntryId],
             references: [jmdictEntryTable.id],
-            relationName: 'entry',
+            relationName: 'kanjiElements',
         }),
         additionalInformation: many(
             jmdictKanjiElementAdditionalInformationTable,

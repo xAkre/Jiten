@@ -32,7 +32,7 @@ const jmdictReadingElementRestrictedReadingRelations = relations(
                 jmdictReadingElementRestrictedReadingTable.jmdictReadingElementId,
             ],
             references: [jmdictReadingElementTable.id],
-            relationName: 'readingElement',
+            relationName: 'restrictedReadings',
         }),
     }),
 );

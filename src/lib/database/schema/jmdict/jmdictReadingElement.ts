@@ -23,7 +23,7 @@ const jmdictReadingElementRelations = relations(
         entry: one(jmdictEntryTable, {
             fields: [jmdictReadingElementTable.jmdictEntryId],
             references: [jmdictEntryTable.id],
-            relationName: 'entry',
+            relationName: 'readingElements',
         }),
         additionalInformation: many(
             jmdictReadingElementAdditionalInformationTable,

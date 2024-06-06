@@ -1,4 +1,4 @@
-import { text } from 'drizzle-orm/pg-core';
+import { text, pgEnum } from 'drizzle-orm/pg-core';
 import { v4 } from 'uuid';
 
 /**
@@ -11,4 +11,16 @@ const uuid = (columnName: string) => {
     return text(columnName).notNull().unique().$default(v4);
 };
 
-export { uuid };
+const jmdictGlossTypeEnum = pgEnum('jmdict_gloss_type', [
+    'figurative',
+    'literal',
+    'explanation',
+    'trademark',
+]);
+
+const jmdictSourceLanguageTypeEnum = pgEnum('jmdict_source_language_type', [
+    'full',
+    'partial',
+]);
+
+export { uuid, jmdictGlossTypeEnum, jmdictSourceLanguageTypeEnum };

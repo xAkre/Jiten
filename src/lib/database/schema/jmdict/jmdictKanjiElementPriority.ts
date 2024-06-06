@@ -27,7 +27,7 @@ const jmdictKanjiElementPriorityRelations = relations(
         kanjiElement: one(jmdictKanjiElementTable, {
             fields: [jmdictKanjiElementPriorityTable.jmdictKanjiElementId],
             references: [jmdictKanjiElementTable.id],
-            relationName: 'kanjiElement',
+            relationName: 'priority',
         }),
     }),
 );
