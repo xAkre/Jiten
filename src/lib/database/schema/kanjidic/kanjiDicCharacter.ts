@@ -32,8 +32,8 @@ const kanjiDicCharacterRelations = relations(
         meanings: many(kanjiDicCharacterMeaningTable, {
             relationName: 'meanings',
         }),
-        nanoris: many(kanjiDicCharacterNanoriTable, {
-            relationName: 'nanoris',
+        nanori: many(kanjiDicCharacterNanoriTable, {
+            relationName: 'nanori',
         }),
         queryCodes: many(kanjiDicCharacterQueryCodeTable, {
             relationName: 'queryCodes',

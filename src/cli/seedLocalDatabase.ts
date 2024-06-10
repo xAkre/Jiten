@@ -10,8 +10,14 @@ import ProgressBar from 'progress';
 import { program } from 'commander';
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { JMdictParser, KanjiDicParser, type JMdictEntry } from 'jmdict.js';
+import {
+    JMdictParser,
+    KanjiDicParser,
+    type JMdictEntry,
+    type KanjiDicCharacter,
+} from 'jmdict.js';
 import * as jmdictSchema from '@/lib/database/schema/jmdict';
+import * as kanjiDicSchema from '@/lib/database/schema/kanjidic';
 import { colors, withColor, hideCursor } from '@/utilities/cli';
 
 /* Define command line options */
@@ -272,7 +278,108 @@ const seedJMdictEntry = async (
     }
 };
 
-const progress = new ProgressBar(
+/**
+ * Seed a KanjiDic character into the database
+ *
+ * @param param0 - The KanjiDic character to seed
+ * @param transaction - The transaction to use
+ */
+const seedKanjiDicCharacter = async (
+    {
+        kanji,
+        codepoints,
+        miscellaneous,
+        radicals,
+        dictionaryNumbers = [],
+        meanings = [],
+        nanori = [],
+        queryCodes = [],
+        readings = [],
+    }: KanjiDicCharacter,
+    transaction: Transaction,
+) => {
+    const { id: kanjiDicCharacterId } = await singleInsert(
+        transaction,
+        kanjiDicSchema.kanjiDicCharacterTable,
+        {
+            kanji,
+            strokeCount: +miscellaneous.strokeCount,
+            grade: miscellaneous.grade,
+            frequency: miscellaneous.frequency,
+            jlptLevel: miscellaneous.jlpt,
+            radicalName: miscellaneous.radicalName,
+        },
+    );
+
+    await Promise.all([
+        insertNonEmptyArray(
+            transaction,
+            kanjiDicSchema.kanjiDicCharacterCodepointTable,
+            codepoints.map((codepoint) => ({
+                kanjiDicCharacterId,
+                ...codepoint,
+            })),
+        ),
+        insertNonEmptyArray(
+            transaction,
+            kanjiDicSchema.kanjiDicCharacterRadicalTable,
+            radicals.map((radical) => ({
+                kanjiDicCharacterId,
+                ...radical,
+            })),
+        ),
+        insertNonEmptyArray(
+            transaction,
+            kanjiDicSchema.kanjiDicCharacterDictionaryNumberTable,
+            dictionaryNumbers.map((dictionaryNumber) => ({
+                kanjiDicCharacterId,
+                ...dictionaryNumber,
+            })),
+        ),
+        insertNonEmptyArray(
+            transaction,
+            kanjiDicSchema.kanjiDicCharacterMeaningTable,
+            meanings.map((meaning) => ({
+                kanjiDicCharacterId,
+                ...meaning,
+            })),
+        ),
+        insertNonEmptyArray(
+            transaction,
+            kanjiDicSchema.kanjiDicCharacterNanoriTable,
+            nanori.map((nanori) => ({
+                kanjiDicCharacterId,
+                nanori,
+            })),
+        ),
+        insertNonEmptyArray(
+            transaction,
+            kanjiDicSchema.kanjiDicCharacterQueryCodeTable,
+            queryCodes.map((queryCode) => ({
+                kanjiDicCharacterId,
+                ...queryCode,
+            })),
+        ),
+        insertNonEmptyArray(
+            transaction,
+            kanjiDicSchema.kanjiDicCharacterReadingTable,
+            readings.map((reading) => ({
+                kanjiDicCharacterId,
+                reading: reading.reading,
+                type: reading.type,
+                onType: reading.onType?.replace('ja_', '') as
+                    | 'kun'
+                    | 'on'
+                    | undefined,
+                status: reading.status,
+            })),
+        ),
+    ]);
+};
+
+/* Seed the database with JMdict data */
+
+let progress = new ProgressBar(
     withColor(
         'Seeding JMdict entries [:bar] [:current/:total] [:percent complete] [:elapsed elapsed]',
         colors.fgYellow,
@@ -282,8 +389,6 @@ const progress = new ProgressBar(
         width: 50,
     },
 );
-
-/* Seed the database with JMdict data */
 
 for (const entry of jmdict.entries) {
     try {
@@ -299,5 +404,40 @@ for (const entry of jmdict.entries) {
         progress.tick();
     }
 }
+
+console.log(withColor('Seeded JMdict entries', colors.fgGreen));
+
+/* Seed the database with KanjiDic data */
+
+progress = new ProgressBar(
+    withColor(
+        'Seeding KanjiDic characters [:bar] [:current/:total] [:percent complete] [:elapsed elapsed]',
+        colors.fgYellow,
+    ),
+    {
+        total: kanjidic.characters.length,
+        width: 50,
+    },
+);
+
+for (const character of kanjidic.characters) {
+    try {
+        await database.transaction(async (transaction) => {
+            await seedKanjiDicCharacter(character, transaction);
+        });
+    } catch (error) {
+        console.error(
+            withColor(
+                `Error seeding KanjiDic character: ${character.kanji}`,
+                colors.fgRed,
+            ),
+        );
+        console.error(error);
+    } finally {
+        progress.tick();
+    }
+}
+
+console.log(withColor('Seeded KanjiDic characters', colors.fgGreen));
 
 process.exit(0);

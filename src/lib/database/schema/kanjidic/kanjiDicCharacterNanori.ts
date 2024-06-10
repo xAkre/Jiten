@@ -17,7 +17,7 @@ const kanjiDicCharacterNanoriRelations = relations(
         kanjiElement: one(kanjiDicCharacterTable, {
             fields: [kanjiDicCharacterNanoriTable.kanjiDicCharacterId],
             references: [kanjiDicCharacterTable.id],
-            relationName: 'nanoris',
+            relationName: 'nanori',
         }),
     }),
 );
