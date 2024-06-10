@@ -272,8 +272,6 @@ const seedJMdictEntry = async (
     }
 };
 
-const seedKanjiDicCha = 'd';
-
 const progress = new ProgressBar(
     withColor(
         'Seeding JMdict entries [:bar] [:current/:total] [:percent complete] [:elapsed elapsed]',
