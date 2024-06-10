@@ -46,8 +46,6 @@ console.log(withColor('Parsing KanjiDic file...', colors.fgYellow));
 const kanjidic = await KanjiDicParser.fromXmlFile(kanjidicFile);
 console.log(withColor('Parsed KanjiDic file', colors.fgGreen));
 
-/* Helper functions */
-
 /**
  * Insert a single entry into a table and return the row
  *
@@ -55,6 +53,7 @@ console.log(withColor('Parsed KanjiDic file', colors.fgGreen));
  * @param transaction - The transaction to use
  * @returns The inserted row
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const singleInsert = async <T extends PgTableWithColumns<any>>(
     transaction: Transaction,
     table: T,
@@ -62,6 +61,26 @@ const singleInsert = async <T extends PgTableWithColumns<any>>(
 ): Promise<T['$inferSelect']> => {
     const result = await transaction.insert(table).values(entry).returning();
     return result[0];
+};
+
+/*
+ * Inserts entries into a table only if the entries array is not empty
+ *
+ * @param transaction - The database transaction to use.
+ * @param table - The table to insert the entries into.
+ * @param entries - The array of entries to insert.
+ * @returns The inserted rows, or null if the array was empty.
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const insertNonEmptyArray = async <T extends PgTableWithColumns<any>>(
+    transaction: Transaction,
+    table: T,
+    entries: T['$inferInsert'][],
+): Promise<T['$inferSelect'] | null> => {
+    if (entries.length === 0) {
+        return null;
+    }
+    return await transaction.insert(table).values(entries);
 };
 
 /**
@@ -78,7 +97,7 @@ const seedJMdictEntry = async (
     }: JMdictEntry,
     transaction: Transaction,
 ) => {
-    const { id: entryId } = await singleInsert(
+    const { id: jmdictEntryId } = await singleInsert(
         transaction,
         jmdictSchema.jmdictEntryTable,
     );
@@ -88,29 +107,30 @@ const seedJMdictEntry = async (
         additionalInformation = [],
         priority = [],
     } of kanjiElements) {
-        const { id: kanjiElementId } = await singleInsert(
+        const { id: jmdictKanjiElementId } = await singleInsert(
             transaction,
             jmdictSchema.jmdictKanjiElementTable,
-            { jmdictEntryId: entryId, kanji },
+            { jmdictEntryId, kanji },
         );
 
-        for (const _additionalInformation of additionalInformation) {
-            await singleInsert(
+        await Promise.all([
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictKanjiElementAdditionalInformationTable,
-                {
-                    jmdictKanjiElementId: kanjiElementId,
-                    additionalInformation: _additionalInformation,
-                },
-            );
-        }
-        for (const _priority of priority) {
-            await singleInsert(
+                additionalInformation.map((additionalInformation) => ({
+                    jmdictKanjiElementId,
+                    additionalInformation,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictKanjiElementPriorityTable,
-                { jmdictKanjiElementId: kanjiElementId, priority: _priority },
-            );
-        }
+                priority.map((priority) => ({
+                    jmdictKanjiElementId,
+                    priority,
+                })),
+            ),
+        ]);
     }
 
     for (const {
@@ -120,46 +140,42 @@ const seedJMdictEntry = async (
         priority = [],
         restrictedReading = [],
     } of readingElements) {
-        const { id: readingElementId } = await singleInsert(
+        const { id: jmdictReadingElementId } = await singleInsert(
             transaction,
             jmdictSchema.jmdictReadingElementTable,
             {
-                jmdictEntryId: entryId,
+                jmdictEntryId,
                 reading,
                 noKanjiReading: noKanjiReading ?? false,
             },
         );
 
-        for (const _additionalInformation of additionalInformation) {
-            await singleInsert(
+        await Promise.all([
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictReadingElementAdditionalInformationTable,
-                {
-                    jmdictReadingElementId: readingElementId,
-                    additionalInformation: _additionalInformation,
-                },
-            );
-        }
-        for (const _priority of priority) {
-            await singleInsert(
+                additionalInformation.map((additionalInformation) => ({
+                    jmdictReadingElementId,
+                    additionalInformation,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictReadingElementPriorityTable,
-                {
-                    jmdictReadingElementId: readingElementId,
-                    priority: _priority,
-                },
-            );
-        }
-        for (const _restrictedReading of restrictedReading) {
-            await singleInsert(
+                priority.map((priority) => ({
+                    jmdictReadingElementId,
+                    priority,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictReadingElementRestrictedReadingTable,
-                {
-                    jmdictReadingElementId: readingElementId,
-                    restrictedReading: _restrictedReading,
-                },
-            );
-        }
+                restrictedReading.map((restrictedReading) => ({
+                    jmdictReadingElementId,
+                    restrictedReading,
+                })),
+            ),
+        ]);
     }
 
     for (const {
@@ -173,91 +189,90 @@ const seedJMdictEntry = async (
         partsOfSpeech = [],
         sourceLanguages = [],
     } of senseElements) {
-        const { id: senseId } = await singleInsert(
+        const { id: jmdictSenseElementId } = await singleInsert(
             transaction,
             jmdictSchema.jmdictSenseElementTable,
-            { jmdictEntryId: entryId },
+            { jmdictEntryId },
         );
 
-        for (const _additionalInformation of additionalInformation) {
-            await singleInsert(
+        await Promise.all([
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictSenseElementAdditionalInformationTable,
-                {
-                    jmdictSenseElementId: senseId,
-                    additionalInformation: _additionalInformation,
-                },
-            );
-        }
-
-        for (const antonym of antonyms) {
-            await singleInsert(
+                additionalInformation.map((additionalInformation) => ({
+                    jmdictSenseElementId,
+                    additionalInformation,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictSenseElementAntonymTable,
-                { jmdictSenseElementId: senseId, antonym },
-            );
-        }
-
-        for (const crossReference of crossReferences) {
-            await singleInsert(
+                antonyms.map((antonym) => ({
+                    jmdictSenseElementId,
+                    antonym,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictSenseElementCrossReferenceTable,
-                { jmdictSenseElementId: senseId, ...crossReference },
-            );
-        }
-
-        for (const dialect of dialects) {
-            await singleInsert(
+                crossReferences.map((crossReference) => ({
+                    jmdictSenseElementId,
+                    ...crossReference,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictSenseElementDialectTable,
-                { jmdictSenseElementId: senseId, dialect },
-            );
-        }
-
-        for (const fieldOfApplication of fieldsOfApplication) {
-            await singleInsert(
+                dialects.map((dialect) => ({
+                    jmdictSenseElementId,
+                    dialect,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictSenseElementFieldOfApplicationTable,
-                { jmdictSenseElementId: senseId, fieldOfApplication },
-            );
-        }
-
-        for (const gloss of glosses) {
-            await singleInsert(
+                fieldsOfApplication.map((fieldOfApplication) => ({
+                    jmdictSenseElementId,
+                    fieldOfApplication,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictSenseElementGlossTable,
-                { jmdictSenseElementId: senseId, ...gloss },
-            );
-        }
-
-        for (const miscellaneousInformation of miscellaneous) {
-            await singleInsert(
+                glosses.map((gloss) => ({
+                    jmdictSenseElementId,
+                    ...gloss,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictSenseElementMiscellaneousInformationTable,
-                {
-                    jmdictSenseElementId: senseId,
+                miscellaneous.map((miscellaneousInformation) => ({
+                    jmdictSenseElementId,
                     miscellaneousInformation,
-                },
-            );
-        }
-
-        for (const partOfSpeech of partsOfSpeech) {
-            await singleInsert(
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictSenseElementPartOfSpeechTable,
-                { jmdictSenseElementId: senseId, partOfSpeech },
-            );
-        }
-
-        for (const sourceLanguage of sourceLanguages) {
-            await singleInsert(
+                partsOfSpeech.map((partOfSpeech) => ({
+                    jmdictSenseElementId,
+                    partOfSpeech,
+                })),
+            ),
+            insertNonEmptyArray(
                 transaction,
                 jmdictSchema.jmdictSenseElementSourceLanguageTable,
-                { jmdictSenseElementId: senseId, ...sourceLanguage },
-            );
-        }
+                sourceLanguages.map((sourceLanguage) => ({
+                    jmdictSenseElementId,
+                    ...sourceLanguage,
+                })),
+            ),
+        ]);
     }
 };
+
+const seedKanjiDicCha = 'd';
 
 const progress = new ProgressBar(
     withColor(
