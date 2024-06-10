@@ -63,13 +63,13 @@ const singleInsert = async <T extends PgTableWithColumns<any>>(
     return result[0];
 };
 
-/*
+/**
  * Inserts entries into a table only if the entries array is not empty
  *
- * @param transaction - The database transaction to use.
- * @param table - The table to insert the entries into.
- * @param entries - The array of entries to insert.
- * @returns The inserted rows, or null if the array was empty.
+ * @param transaction - The database transaction to use
+ * @param table - The table to insert the entries into
+ * @param entries - The array of entries to insert
+ * @returns The inserted rows, or null if the array was empty
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const insertNonEmptyArray = async <T extends PgTableWithColumns<any>>(
