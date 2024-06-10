@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, text } from 'drizzle-orm/pg-core';
+import { pgTable, text, index } from 'drizzle-orm/pg-core';
 import { uuid } from '../customTypes';
 import { jmdictEntryTable } from './jmdictEntry';
 import { jmdictSenseElementAdditionalInformationTable } from './jmdictSenseElementAdditionalInformation';
@@ -12,14 +12,20 @@ import { jmdictSenseElementMiscellaneousInformationTable } from './jmdictSenseEl
 import { jmdictSenseElementPartOfSpeechTable } from './jmdictSenseElementPartOfSpeech';
 import { jmdictSenseElementSourceLanguageTable } from './jmdictSenseElementSourceLanguage';
 
-const jmdictSenseElementTable = pgTable('jmdict_sense_element', {
-    id: uuid('id').primaryKey(),
-    jmdictEntryId: text('jmdict_entry_id')
-        .notNull()
-        .references(() => jmdictEntryTable.id, {
-            onDelete: 'cascade',
-        }),
-});
+const jmdictSenseElementTable = pgTable(
+    'jmdict_sense_element',
+    {
+        id: uuid('id').primaryKey(),
+        jmdictEntryId: text('jmdict_entry_id')
+            .notNull()
+            .references(() => jmdictEntryTable.id, {
+                onDelete: 'cascade',
+            }),
+    },
+    (table) => ({
+        idIndex: index('jmdict_sense_element_id_index').on(table.id),
+    }),
+);
 
 const jmdictSenseElementRelations = relations(
     jmdictSenseElementTable,
