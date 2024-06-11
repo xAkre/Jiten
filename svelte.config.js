@@ -9,8 +9,8 @@ const config = {
             appTemplate: 'src/index.html',
         },
         alias: {
-            "@/*": "./src/*",
-        }
+            '@/*': './src/*',
+        },
     },
 };
 

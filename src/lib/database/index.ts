@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
+import * as jmdictSchema from './schema/jmdict';
+import * as kanjiDicSchema from './schema/kanjidic';
 
 dotenv.config({ path: '.env' });
 
@@ -21,6 +23,11 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const sql = neon(databaseUrl);
-const database = drizzle(sql);
+const database = drizzle(sql, {
+    schema: {
+        ...jmdictSchema,
+        ...kanjiDicSchema,
+    },
+});
 
 export { database };
