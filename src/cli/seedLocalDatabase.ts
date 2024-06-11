@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * This script is used to seed a local database with JMdict and KanjiDic data for development purposes.
- * It assumes that the database has already been created and that the schema has been migrated
+ * This script is used to migrate and seed a local database with JMdict and KanjiDic data for development purposes
  */
 
 import pg from 'pg';
@@ -10,6 +9,7 @@ import ProgressBar from 'progress';
 import { program } from 'commander';
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import {
     JMdictParser,
     KanjiDicParser,
@@ -25,6 +25,10 @@ import { colors, withColor, hideCursor } from '@/utilities/cli';
 program
     .usage('--database-url <url> --jmdict-file <path> --kanjidic-file <path>')
     .requiredOption('--database-url <url>', 'The URL of the database to seed')
+    .requiredOption(
+        '--migrations-folder <path>',
+        'The path to the database migrations folder',
+    )
     .requiredOption('--jmdict-file <path>', 'The path to the JMdict XML file')
     .requiredOption(
         '--kanjidic-file <path>',
@@ -32,13 +36,21 @@ program
     )
     .parse(process.argv);
 
-const { databaseUrl, jmdictFile, kanjidicFile } = program.opts();
+const { databaseUrl, jmdictFile, kanjidicFile, migrationsFolder } =
+    program.opts();
 
 /* Connect to the database */
 
 const client = new pg.Client({ connectionString: databaseUrl });
 await client.connect();
 const database = drizzle(client);
+
+/* Migrate tables */
+
+await migrate(database, {
+    migrationsFolder: migrationsFolder,
+});
+
 type Transaction = NodePgDatabase;
 
 /* Parse the JMdict and KanjiDic files */

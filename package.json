@@ -12,7 +12,8 @@
         "dev": "vite dev",
         "build": "vite build",
         "preview": "vite preview",
-        "database:generate": "drizzle-kit generate"
+        "database:generate": "drizzle-kit generate",
+        "database:seed:local": "npm run database:generate && npx tsx ./src/cli/seedLocalDatabase.ts --migrations-folder=\"./src/lib/database/migrations\""
     },
     "keywords": [],
     "author": "",

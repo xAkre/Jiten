@@ -1,9 +1,11 @@
 import dotenv from 'dotenv';
-import { defineConfig } from 'drizzle-kit';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
 
 dotenv.config({ path: '.env' });
 
 let databaseUrl: string;
+
 if (process.env.NODE_ENV === 'development') {
     if (!process.env.DEVELOPMENT_DATABASE_URL) {
         throw new Error('DEVELOPMENT_DATABASE_URL is not set');
@@ -18,17 +20,7 @@ if (process.env.NODE_ENV === 'development') {
     databaseUrl = process.env.PRODUCTION_DATABASE_URL;
 }
 
-const config = defineConfig({
-    dialect: 'postgresql',
-    schema: [
-        'src/lib/database/schema/customTypes.ts',
-        'src/lib/database/schema/jmdict',
-        'src/lib/database/schema/kanjidic',
-    ],
-    out: 'src/lib/database/migrations',
-    dbCredentials: {
-        url: databaseUrl,
-    },
-});
+const sql = neon(databaseUrl);
+const database = drizzle(sql);
 
-export default config;
+export { database };
